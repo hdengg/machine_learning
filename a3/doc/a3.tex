@@ -1,0 +1,282 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{listings} 
+\usepackage{algorithm2e}
+
+\def\rubric#1{\gre{Rubric: \{#1\}}}{}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+% Math
+\def\R{\mathbb{R}}
+\def\argmax{\mathop{\rm arg\,max}}
+\def\argmin{\mathop{\rm arg\,min}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\alignStar}[1]{\begin{align*}#1\end{align*}}
+\def\half{\frac 1 2}
+
+% LaTeX
+\newcommand{\fig}[2]{\includegraphics[width=#1\textwidth]{#2}}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+\newcommand{\matCode}[1]{\lstinputlisting[language=Matlab]{a2f/#1.m}}
+\def\items#1{\begin{itemize}#1\end{itemize}}
+\def\enum#1{\begin{enumerate}#1\end{enumerate}}
+
+\begin{document}
+
+\title{CPSC 340 Assignment 3}
+\date{}
+\maketitle
+
+\vspace{-7em}
+
+\section{Vectors, Matrices, and Quadratic Functions}
+
+\subsection{Basic Operations}
+
+\enum{
+\item $x^Tx = 2^2 + 3^2 = 13$
+\item $\norm{x}^2 = x^Tx  = 13$
+\item $x^T(x + \alpha y) = 
+\left[\begin{array}{cc}
+2 & -3\\
+\end{array}\right] 
+(\left[\begin{array}{c}
+2\\
+-3\\
+\end{array}\right] 
++ 
+\left[\begin{array}{c}
+5\\
+20\\
+\end{array}\right])
+= 
+\left[\begin{array}{cc}
+2 & -3\\
+\end{array}\right] 
+\left[\begin{array}{c}
+7\\
+17\\
+\end{array}\right]
+= 2(7) + -3(17) = -37$
+\item $Ax = \left[\begin{array}{ccc}
+1 & 2\\
+2 & 3\\
+3 & -2
+\end{array}\right]
+\left[\begin{array}{c}
+2\\
+-3\\
+\end{array}\right]
+=
+\left[\begin{array}{c}
+1(2) + 2(-3)\\
+2(2) + 3(-3)\\
+3(2) + -2(-3)\\
+\end{array}\right]
+=
+\left[\begin{array}{c}
+-4\\
+-5\\
+12\\
+\end{array}\right]$
+\item $z^TAx = 
+\left[\begin{array}{ccc}
+2 & 0 & 1\\
+\end{array}\right]
+\left[\begin{array}{c}
+-4\\
+-5\\
+12\\
+\end{array}\right]
+= 2(-4) + 0(-5) + 1(12) = 4$
+\item $A^TA = \left[\begin{array}{ccc}
+1 & 2 & 3\\
+1 & 3 & -2\\
+\end{array}\right]
+\left[\begin{array}{ccc}
+1 & 2\\
+2 & 3\\
+3 & -2
+\end{array}\right]
+= 
+\left[\begin{array}{cc}
+1(1) + 2(2) + 3(3) & 1(2) + 2(3) + 3(-2)\\
+2(1) + 3(2) + -2(3) & 2(2) + 3(3) + -2(-2)\\
+\end{array}\right]
+= 
+\left[\begin{array}{cc}
+14 & 2\\
+2 & 17\\
+\end{array}\right]$
+\item True: $yy^Ty = y(y^Ty) = y \norm{y}^2 = \norm{y}^2 y$. Since $\norm{y}^2$ is a scalar, order does not matter.
+\item True: $x^TA^T(Ay + Az) = x^TA^TAy + x^TA^TAz = x^TA^TAy + (Ax)^T(Az) = x^TA^TAy + (Az)^T(Ax) = x^TA^TAy + z^TA^TAx$
+\item False: $x^T(B + C) = x^TB + x^TC$ since matrix-vector multiplication is not commutative.
+\item True: $(A + BC)^T = A^T + (BC)^T = A^T + C^TB^T$
+\item False: $(x-y)^T(x-y) = x^Tx - x^Ty - y^Tx + y^Ty = x^Tx - x^Ty - x^Ty + y^Ty = \norm{x}^2 + \norm{y}^2 - 2x^Ty$
+\item True: $(x-y)^T(x+y) = x^Tx + x^Ty - y^Tx - y^Ty = x^Tx + x^Ty - x^Ty - y^Ty = \norm{x}^2 - \norm{y}^2$
+}
+
+\subsection{Converting to Matrix/Vector/Norm Notation}
+
+\enum{
+\item $\sum_{i=1}^n |w^Tx_i - y_i| = \norm{Xw - y}_1$
+\item $\max_{i \in \{1,2,\dots,n\}} |w^Tx_i  - y_i| + \frac{\lambda}{2}\sum_{j=1}^d w_j^2 = \norm{Xw - y}_\infty +  \frac{\lambda}{2} \norm{w}^2$
+\item $\sum_{i=1}^n z_i (w^Tx_i - y_i)^2 + \lambda \sum_{j=1}^{d} |w_j| = Z \norm{Xw - y}^2 + \lambda\norm{w}_1$
+}
+
+\subsection{Minimizing Quadratic Functions as Linear Systems}
+
+\enum {
+\item $f(w) = \frac{1}{2}\norm{w-v}^2 = \frac{1}{2}\norm{w}^2 + \frac{1}{2}\norm{v}^2 - w^Tv \\
+\nabla f(w) = w - v = 0 \\
+\therefore$ When $w = v, \nabla f(w) = 0$
+\item $f(w) = \frac{1}{2}\norm{w}^2 + w^TX^Ty \\
+\nabla f(w) = w + X^Ty = 0 \\
+\therefore$ When $w = -X^Ty, \nabla f(w) = 0$
+\item $f(w) = \frac{1}{2}\sum_{i=1}^n z_i (w^Tx_i - y_i)^2 = Z \norm{Xw - y}^2 + \lambda\norm{w}_1 = \frac{1}{2}w^TX^TZXw + \frac{1}{2}y^TZy - w^TX^TZy \\
+\nabla f(w) = X^TZXw - X^TZy = 0 \\
+\therefore$ When $X^TZXw = X^TZy, \nabla f(w) = 0$
+}
+
+\section{Robust Regression and Gradient Descent}
+
+\subsection{Weighted Least Squares in One Dimension}
+
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_c5u0b_a3/blob/master/code/linear_model.py} \\
+
+\centerfig{.7}{../figs/least_squares_outliers_weighted.pdf} 
+
+\subsection{Smooth Approximation to the L1-Norm}
+
+$f(w) = \sum_{i=1}^n  \log\left(\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)\right) \\
+\nabla f(w) =  \sum_{i=1}^n \frac{\partial}{\partial w}  \log\left(\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)\right) \\
+\nabla f(w) = \sum_{i=1}^n \frac{\frac{\partial}{\partial w} \left(\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)\right)}{\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)} \\
+\nabla f(w) = \sum_{i=1}^n \frac{\exp(w^Tx_i - y_i)\frac{\partial}{\partial w}(w^Tx_i - y_i)\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)(-1)\frac{\partial}{\partial w}(w^Tx_i - y_i)}{\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)} \\
+\nabla f(w) = \sum_{i=1}^n \frac{\exp(w^Tx_i - y_i)x_{ij} - \exp(y_i - w^Tx_i)x_{ij}}{\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)} \\
+\nabla f(w) = \sum_{i=1}^n x_{ij} \frac{\exp(w^Tx_i - y_i) - \exp(y_i - w^Tx_i)}{\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)}$
+
+\subsection{Robust Regression}
+
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_c5u0b_a3/blob/master/code/linear_model.py} \\
+
+\centerfig{.7}{../figs/least_squares_robust.pdf}
+
+\pagebreak 
+
+\section{Linear Regression and Nonlinear Bases}
+
+\subsection{Adding a Bias Variable}
+
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_c5u0b_a3/blob/master/code/linear_model.py} \\
+
+\centerfig{.7}{../figs/least_squares_bias.pdf}  
+{\centering training error = 3551.346 \\
+test error = 3393.869 \\}
+
+\subsection{Polynomial Basis}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_c5u0b_a3/blob/master/code/linear_model.py} \\
+\centerfig{.7}{../figs/PolyBasis0.pdf} 
+{\centering training error = 15480.5 \\
+test error = 14390.8 \\}
+\centerfig{.7}{../figs/PolyBasis1.pdf} 
+{\centering training error = 3551.3 \\
+test error = 3393.9 \\}
+\centerfig{.7}{../figs/PolyBasis2.pdf} 
+{\centering training error = 2168.0\\
+test error = 2480.7 \\}
+\centerfig{.7}{../figs/PolyBasis3.pdf} 
+{\centering training error = 252.0 \\
+test error = 242.8 \\}
+\centerfig{.7}{../figs/PolyBasis4.pdf} 
+{\centering training error = 251.5 \\
+test error = 242.1 \\}
+\centerfig{.7}{../figs/PolyBasis5.pdf} 
+{\centering training error = 251.1 \\
+test error = 239.5 \\}
+\centerfig{.7}{../figs/PolyBasis6.pdf} 
+{\centering training error = 247.0 \\
+test error = 242.9 \\}
+\centerfig{.7}{../figs/PolyBasis7.pdf} 
+{\centering training error = 241.3 \\
+test error = 246.0 \\}
+\centerfig{.7}{../figs/PolyBasis8.pdf} 
+{\centering training error = 241.3 \\
+test error = 246.0 \\}
+\centerfig{.7}{../figs/PolyBasis9.pdf} 
+{\centering training error = 235.8 \\
+test error = 259.3 \\}
+\centerfig{.7}{../figs/PolyBasis10.pdf} 
+{\centering training error = 235.1 \\
+test error = 256.3 \\} 
+\vspace*{10px}
+{\centering As $p$ increases, the training error decreases. However, the test error decreases initially up to $p=5$ but then increases as $p$ increases, probably due to overfitting.}
+
+\section{Non-Parametric Bases and Cross-Validation}
+
+\subsection{Proper Training and Validation Sets}
+
+Without shuffling and data splitting, the train and test errors were 2184.1 and 2495.9 respectively. After shuffling, the train and test errors were 39.5 and 71.2 respectively. The change is around a 50 times decrease in training error and a 35 times decrease in test error. 
+
+\centerfig{.7}{../figs/least_squares_rbf_bad.pdf}  
+\centerfig{.7}{../figs/least_squares_rbf_good.pdf}  
+
+\subsection{Cross-Validation}
+
+{\enum{
+\item We observed that $\sigma$ = $1$ and $4$ resulted in the lowest errors for both train and test. Surprisingly, we found that $\sigma$ = $1$ was the most common result when we ran the script multiple times.
+\item 
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_c5u0b_a3/blob/master/code/main.py}.
+This procedure typically selects $\sigma$ = $1$. 
+}
+
+\subsection{Cost of Non-Parametric Bases}
+
+(a) Linear basis: 
+\\ Training cost: $X^TX$ costs $O(nd^2)$. For the inverse $(X^TX)^{-1}$ costs $O(d^3)$. The total cost is $O(nd^2 + d^3)$.
+\\ Classifying cost: Each test costs $O(d)$ to compute $\hat y$. For $t$ test examples, the total cost is $O(td)$. \\
+\\ (b) Gaussian RBF:
+\\ Training cost: It takes $O(n^2)$ to construct Z, and $O(n^3)$ to compute $Z^TZ$ and the inverse of $Z^TZ$. The total cost is $O(n^3)$.
+\\ Classifying cost: It takes $O(tnd)$ to compute $\hat Z$. For each element in $\hat y$, it costs $O(n)$ to add the inner products. Since $\hat y$ has $t$ entries, the cost is $O(tn)$. In total, classifying t examples is $O(tnd + tn)$ = $O(tnd)$.
+
+{\centering For RBFs, since the number of features is equal to n, it will be cheaper to train with RBFs where $n < d$. However, since testing with a linear basis costs $O(td)$ and testing with RBFs costs $O(tnd)$, and $n > 1$, RBFs are rarely cheaper to test than the linear case. }
+
+\section{Very-Short Answer Questions}
+
+\subsection{Essentials}
+
+\enum{
+\item We compute the squared error $(y_i - \hat{y}_i)^2$ because it gives us a measure of how far apart our data is from the actual value rather than just telling us whether the prediction was exactly correct or not. 
+\item $A = \left[\begin{array}{cc}
+1 & 2\\
+2 & 4\\
+3 & 6\\
+4 & 8\\
+\end{array}\right]$
+\item $O(n)$
+\item When there is multiple clusters of data in the same dataset, a regression tree would be able to isolate those clusters and then linear regression could be run on each of the clusters to produce a more accurate result.
+\item With a convex loss function, we know that any minimum found is a global minimum, thus making is easier to solve. 
+\item When $d$ is very large, gradient descent can be much faster than using the normal equations. 
+\item When we have datasets in multiple dimensions, it's hard to solve the equation that results in order to set the gradient to 0. Also, some of those equations may not have a solution.
+\item The normal equations only work in very specific situations; gradient descent can be applied to any loss function, such as the sum of absolute values.
+\item With too small a learning rate, the number of iterations required to reach a solution will be high and thus, computational cost will be high.
+\item With too high a learning rate, there is a chance the algorithm will overstep the solution and never be able to actually reach it.
+}
+
+\end{document}
