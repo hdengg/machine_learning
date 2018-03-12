@@ -1,0 +1,143 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{listings} % For displaying code
+\usepackage{algorithm2e} % pseudo-code
+
+\def\rubric#1{\gre{Rubric: \{#1\}}}{}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+% Math
+\def\R{\mathbb{R}}
+\def\argmax{\mathop{\rm arg\,max}}
+\def\argmin{\mathop{\rm arg\,min}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\alignStar}[1]{\begin{align*}#1\end{align*}}
+\def\half{\frac 1 2}
+
+% LaTeX
+\newcommand{\fig}[2]{\includegraphics[width=#1\textwidth]{#2}}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+\newcommand{\matCode}[1]{\lstinputlisting[language=Matlab]{a2f/#1.m}}
+\def\items#1{\begin{itemize}#1\end{itemize}}
+\def\enum#1{\begin{enumerate}#1\end{enumerate}}
+
+\begin{document}
+
+
+\title{CPSC 340 Assignment 4}
+\author{Henry Deng: c1z8}
+\date{}
+\maketitle
+
+\vspace{-4em}
+
+\section{Convex Functions}
+
+\enum{
+\item{$\frac{d}{dx}$ f'(w) = $2\alpha - \beta \ge 0$
+\newline{\blu{Since $\alpha \ge 0$, the second derivative is always greater than or equal to zero for the entire domain, therefore, the function is convex.}}}
+\item{$\frac{d}{dx}$ f'(w) = ${\frac{1}{w} \ge 0}$
+\newline{\blu{Since $w > 0$, the second derivative will always be greater or equal to 0 for the entire domain; therefore, the function is convex.}}}
+\item{$f(w) = \norm{Xw - y}^2 + \lambda\norm{w}_1$
+\newline{\blu{The summation of two convex functions is a convex function. Firstly, $\norm{Xw - y}^2$ is a convex function because the 2-norm is convex, and so is $\norm{w}_1$. Furthermore, lambda is greater than or equal to 0, so $\lambda\norm{w}_1$ is convex. All the elements of the function are convex and when added together, the function is still convex}}
+\item{$f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i))$
+\newline{\blu{The sum of convex functions is convex, so we need to show that $\log(1+\exp(-y_iw^Tx_i))$ is convex.}}
+\newline{\blu{Let $(-y_iw^Tx_i)$ be a constant x. The first differentiation yields $\frac{1}{1+e(-x)}$. Differentiating again, we get $\frac{e(-x)}{(1+e(-x))^2}$. This simplifies to $\frac{1}{1+e(-x)}\cdot$$\frac{e(-x)}{1+e(-x)}$ This function cannot be negative, therefore, f(w) must be convex.}}
+\item{\blu{Since $w_0 - w^Tx_i$ is a linear function, we know it must be convex. As a result, $\sum_{i=1}^n \max{[0, w_0 - w^Tx_i]}$ is also convex because the maximum of a convex function is convex. Since lambda is $\ge 0$ and $\norm{w}^2$ is convex, the sum of these functions must also be convex.}}
+}
+}
+}
+
+
+
+\section{Logistic Regression with Sparse Regularization}
+
+\subsection{L2-Regularization}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/linear_model.py} \\
+\blu{The updated training error is: 0.02, the validation error is: 0.074, the number of features is 101, and the number of gradient descent iterations is 36.}
+
+\subsection{L1-Regularization}
+
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/linear_model.py} \\
+\blu{The updated training error is: 0.000, the validation error is: 0.048, the number of features is 72, and the number of gradient descent iterations is 351.}
+
+\subsection{L0-Regularization}
+
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/linear_model.py} \\
+\blu{The updated training error is: 0.000, the validation error is: 0.040, the number of non-zeros is 25.}
+
+
+\subsection{Discussion}
+
+\blu{From the results, the performance is as follows: $L0 > L1 > L2$. L0 selects more important features since it has the lowest number of non-zeros. As a result, the validation error from L0 is lower than L1 and L2 regularization. However, the run-time for L0 is significantly slower than L1 and L2.}
+
+
+\subsection{Comparison with scikit-learn}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/main.py} \\
+\blu{The results from the scikit-learn yielded very similar results to my own. In terms of L2, the training, validation, and number of non-zeros remained the same. For L1, the training error remained the same, but the validation error slightly increased to 0.052 and the non-zeros count decreased from 72 to 71.}
+
+
+\section{Multi-Class Logistic}
+
+\subsection{Softmax Classification, toy example}
+
+We want to maximize the inner-product of, $w_c^T\hat{x}$
+
+$w_1^T\hat{x} = (+2)(1) + (-1)(1) = 1$
+\newline{$w_2^T\hat{x} = (+2)(1) + (+2)(1) = 4$}
+\newline{$w_3^T\hat{x} = (+3)(1) + (-1)(1) = 2$}
+
+\blu{Under this model, label 2 would maximize the inner-product, and would be chosen for this test example.}
+
+\subsection{One-vs-all Logistic Regression}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/linear_model.py} \\
+\blu{The validation error is 0.070 and the training error is 0.084.}
+
+\subsection{Softmax Classifier Implementation}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/linear_model.py} \\
+\blu{The validation error is 0.008 and the training error is 0.}
+
+\subsection{Comparison with scikit-learn, again}
+Code: Linked in README, \url{https://github.ugrad.cs.ubc.ca/CPSC340-2017W-T2/c1z8_a4/blob/master/code/main.py} \\
+\blu{The training and validation errors were a bit higher than our implementation for OVA, with training error = 0.100 and validation error = 0.080. For softmax, the results from scikit-learn were roughly the same as our implementation: the training error = 0.008, and the validation error = 0.}
+
+\subsection{Cost of Multinomial Logistic Regression}
+
+\enum{
+\item \blu{Computing the derivative for $f(w)$ with respect to one entry in $W$ takes $n(d + dk)$ time. For all entries in $W$, this will take $dk(nd + ndk)$ time. For t iterations, we get a total cost of $O(tnk^2d^2)$}.
+\item \blu{To predict $XW$ and find the max of all training examples will take $O(tkd)$ time}
+}
+
+\section{Very-Short Answer Questions}
+
+\enum{
+\item Using validation error to choose features tends to overfit. Score BIC makes sure that selecting too many features is penalized in proportion to our sample size, which results in better feature selection.
+\item Exhaustively searching takes a very long time (exponential run time) whereas forward selection can be run in polynomial time
+\item As lambda decreases, more of our results are determined by the objective function, so train error is small but test error is high. When lambda increases, train error increases but test error decreases. 
+\item L1 could be preferred when there's a lot of irrelevant features since it does feature selection. L2 could be preferred because it's differentiable and has a unique solution (easier to compute). 
+\item The penalty for being too right is very significant when using least squares, ie. $w^Tx_i$ = +100 and $y_i$ = +1 
+\item SVM will choose a classifier that is farthest from both classes (the largest margin), whereas perceptron finds any classifier with zero error. 
+\item All of the methods produce a linear classifier. 
+\item Multi-label: each data point can be assigned multiple labels. Mult-class: a classification task with more than two classes with the assumption that each sample is assigned to only one label
+\item Fill in the question marks: for one-vs-all multi-class logistic regression, we are solving \blu{one} optimization problem(s) of dimension \blu{k}. On the other hand, for softmax logistic regression, we are solving \blu{more than one} optimization problem(s) of dimension \blu{k}.
+}
+
+
+\end{document}
